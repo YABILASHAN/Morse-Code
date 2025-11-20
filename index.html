@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Moose (Morse) Converter — ABILASHAN PROJECTS</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#38bdf8; --glass:rgba(255,255,255,0.03);
+      --radius:14px; --gap:14px; --pad:18px;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+       background: url("bg.png") no-repeat center center fixed;
+       background-size: cover;
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:28px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:20px;
+      min-height:100vh;
+    }
+
+ .container{
+  width:100%;
+  max-width:1250px;     /* wider */
+  min-height:750px;     /* increased height */
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:18px;
+  padding:28px;         /* more inner spacing */
+  box-shadow:0 8px 35px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+  margin-top:40px;
+}
+
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    header .title{
+      display:flex; gap:12px; align-items:center;
+    }
+    .logo{
+      width:52px; height:52px; border-radius:12px;
+      display:grid; place-items:center; font-weight:700;
+      background:linear-gradient(135deg,var(--accent),#7c3aed 70%);
+      color:#022036; font-size:18px;
+      box-shadow: 0 6px 20px rgba(56,189,248,0.12);
+    }
+    h1{margin:0; font-size:18px}
+    p.lead{margin:0; color:var(--muted); font-size:13px}
+
+    .main{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+    }
+
+    nav.cards{
+      background:var(--card); padding:12px; border-radius:12px;
+      min-height:320px;
+    }
+    .menu-btn{
+      display:flex; gap:12px; align-items:center;
+      padding:10px; border-radius:10px; cursor:pointer;
+      user-select:none; color:var(--muted);
+    }
+    .menu-btn.active{ background:var(--glass); color:var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02) }
+
+.panel{
+  background:rgba(0,0,0,0.45);
+  padding:26px;
+  border-radius:18px;
+  min-height:500px;     /* increased from 420px */
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+} 
+    label{font-size:13px; color:var(--muted)}
+    textarea,input,select{
+      width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);
+      background:rgba(255,255,255,0.015); color:inherit; font-size:14px; resize:vertical;
+    }
+
+    .row{display:flex; gap:10px; align-items:center}
+    .controls{display:flex; gap:8px; align-items:center}
+    button{
+      padding:10px 12px; border-radius:10px; border:0; cursor:pointer; font-weight:600;
+      background:linear-gradient(90deg,var(--accent),#7c3aed); color:#022036;
+      box-shadow: 0 6px 20px rgba(7,12,20,0.45);
+    }
+    button.ghost{
+      background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.03);
+    }
+    .small{padding:8px 10px; font-size:13px}
+
+    .result{white-space:pre-wrap; min-height:120px; padding:12px; border-radius:10px; background:rgba(0,0,0,0.25); overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
+    footer{display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--muted); font-size:13px; margin-top:8px}
+
+    /* responsive */
+    @media (max-width:880px){
+      .main{grid-template-columns:1fr; }
+     nav.cards{
+  background:rgba(255,255,255,0.12);
+  padding:20px;
+  border-radius:14px;
+  min-height:500px;     /* increased height */
+}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Moose Converter">
+    <header>
+      <div class="title">
+        <div class="logo">M</div>
+        <div>
+          <h1>Moose Converter — Morse & more</h1>
+          <p class="lead">Encode / Decode Morse plus Base64, Case, and Bytes converter </p>
+        </div>
+      </div>
+      <div>
+        <button id="helpBtn" class="ghost small">How to use</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <nav class="cards" aria-label="Converter menu">
+        <div id="menuMorse" class="menu-btn active" data-panel="morse">• Morse (Encode / Decode)</div>
+        <div id="menuCase" class="menu-btn" data-panel="case">• Case Converter</div>
+        <div id="menuBase64" class="menu-btn" data-panel="base64">• Base64 Encode / Decode</div>
+        <div id="menuBytes" class="menu-btn" data-panel="bytes">• Bytes Unit Converter</div>
+
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:12px 0">
+
+        <div style="color:var(--muted);font-size:13px">Quick actions</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <button id="copyResult" class="small ghost">Copy Result</button>
+          <button id="clearAll" class="small ghost">Clear All</button>
+          <button id="swap" class="small ghost">Swap Input/Output</button>
+        </div>
+      </nav>
+
+      <section class="panel" id="panelArea">
+        <!-- Morse Panel -->
+        <div id="panel-morse" class="panel-item">
+          <label for="morseInput">Input (text or Morse):</label>
+          <textarea id="morseInput" rows="6" placeholder="Type text or Morse here (use . and - for Morse, separate letters with spaces and words with / ). Example: ... --- ..."></textarea>
+
+          <div class="row" style="justify-content:space-between">
+            <div class="controls">
+              <label><input type="radio" name="morseMode" value="auto" checked> Auto</label>
+              <label><input type="radio" name="morseMode" value="encode"> Encode</label>
+              <label><input type="radio" name="morseMode" value="decode"> Decode</label>
+            </div>
+            <div class="controls">
+              <button id="morseGo" class="small">Convert</button>
+              <button id="morsePlay" class="small ghost">Play (audio)</button>
+            </div>
+          </div>
+
+          <label style="margin-top:6px">Result:</label>
+          <div id="morseResult" class="result" aria-live="polite"></div>
+        </div>
+
+        <!-- Case Panel -->
+        <div id="panel-case" class="panel-item" style="display:none">
+          <label for="caseInput">Text:</label>
+          <textarea id="caseInput" rows="5" placeholder="Type text to convert case..."></textarea>
+
+          <div class="row">
+            <div class="controls">
+              <select id="caseAction">
+                <option value="upper">UPPERCASE</option>
+                <option value="lower">lowercase</option>
+                <option value="title">Title Case</option>
+                <option value="swap">Swap Case</option>
+              </select>
+              <button id="caseGo" class="small">Convert</button>
+            </div>
+          </div>
+
+          <label>Result:</label>
+          <div id="caseResult" class="result"></div>
+        </div>
+
+        <!-- Base64 Panel -->
+        <div id="panel-base64" class="panel-item" style="display:none">
+          <label for="b64Input">Input:</label>
+          <textarea id="b64Input" rows="5" placeholder="Text to encode/decode base64"></textarea>
+
+          <div class="row">
+            <div class="controls">
+              <select id="b64Action">
+                <option value="encode">Base64 Encode</option>
+                <option value="decode">Base64 Decode</option>
+              </select>
+              <button id="b64Go" class="small">Go</button>
+            </div>
+          </div>
+
+          <label>Result:</label>
+          <div id="b64Result" class="result"></div>
+        </div>
+
+        <!-- Bytes Panel -->
+        <div id="panel-bytes" class="panel-item" style="display:none">
+          <label for="bytesInput">Value:</label>
+          <div class="row">
+            <input id="bytesInput" type="number" placeholder="Enter numeric value" />
+            <select id="bytesFrom">
+              <option value="B">B</option>
+              <option value="KB">KB</option>
+              <option value="MB" selected>MB</option>
+              <option value="GB">GB</option>
+            </select>
+            <span style="color:var(--muted)">→</span>
+            <select id="bytesTo">
+              <option value="B">B</option>
+              <option value="KB">KB</option>
+              <option value="MB" selected>MB</option>
+              <option value="GB">GB</option>
+            </select>
+            <button id="bytesGo" class="small">Convert</button>
+          </div>
+
+          <label style="margin-top:8px">Result:</label>
+          <div id="bytesResult" class="result"></div>
+        </div>
+
+        <footer>
+          <div>Made with ❤️ — ABILASHAN</div>
+          <div style="color:var(--muted)">Tip: words separated by <code>/</code> in Morse</div>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Morse table
+const MORSE_TABLE = {
+  'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....',
+  'I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.',
+  'Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-',
+  'Y':'-.--','Z':'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-', ',':'--..--','?':'..--..', "'":'.----.','!':'-.-.--','/':'-..-.',
+  '(':'-.--.',')':'-.--.-','&':'.-... ',':':'---...',';':'-.-.-.','=':'-...-',
+  '+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.','$':'...-..-','@':'.--.-.'
+};
+
+    // reverse table
+    const REVERSE_MORSE = {};
+    for (const k in MORSE_TABLE) REVERSE_MORSE[MORSE_TABLE[k].trim()] = k;
+
+    // helpers
+    function encodeMorse(text){
+      if (!text) return '';
+      return text.toUpperCase().split(' ').map(word=> {
+        return word.split('').map(ch => MORSE_TABLE[ch] || '?').join(' ');
+      }).join(' / ');
+    }
+
+    function decodeMorse(morse){
+      if (!morse) return '';
+      // allow different separators: / for words or double spaces
+      // normalize: trim and replace multiple spaces around slashes
+      morse = morse.trim();
+      // If input contains '.' or '-' assume morse, else return as-is
+      return morse.split(' / ').map(word=>{
+        return word.split(/\s+/).map(symbol=>{
+          return REVERSE_MORSE[symbol] || (symbol === '' ? '' : '?');
+        }).join('');
+      }).join(' ');
+    }
+
+    // UI wiring
+    const panels = {
+      morse: document.getElementById('panel-morse'),
+      case: document.getElementById('panel-case'),
+      base64: document.getElementById('panel-base64'),
+      bytes: document.getElementById('panel-bytes'),
+    };
+
+    // menu
+    document.querySelectorAll('.menu-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        // show panel
+        const target = btn.getAttribute('data-panel');
+        for (const k in panels) panels[k].style.display = (k===target ? '' : 'none');
+      });
+    });
+
+    // Morse convert
+    const morseInput = document.getElementById('morseInput');
+    const morseResult = document.getElementById('morseResult');
+    const morseGo = document.getElementById('morseGo');
+    morseGo.addEventListener('click', ()=>{
+      const mode = document.querySelector('input[name="morseMode"]:checked').value;
+      let val = morseInput.value.trim();
+      if (!val){ morseResult.textContent = ''; return; }
+      if (mode === 'auto'){
+        // simple heuristic: if contains only . - / and spaces assume morse -> decode
+        if (/^[\s\.\/\-]+$/.test(val)) {
+          morseResult.textContent = decodeMorse(val);
+        } else {
+          morseResult.textContent = encodeMorse(val);
+        }
+      } else if (mode === 'encode'){
+        morseResult.textContent = encodeMorse(val);
+      } else {
+        morseResult.textContent = decodeMorse(val);
+      }
+    });
+
+    // morse play (simple beeps using WebAudio)
+    const morsePlay = document.getElementById('morsePlay');
+    morsePlay.addEventListener('click', async ()=>{
+      const out = morseResult.textContent || morseInput.value;
+      if (!out) return alert('No morse to play. Convert first or paste morse into input.');
+      // if current content is text, encode to morse
+      let morse = out.trim();
+      if (!/^[\.\-\s\/]+$/.test(morse)){
+        morse = encodeMorse(out);
+      }
+      try{
+        await playMorse(morse);
+      }catch(e){ console.error(e); alert('Audio play failed: ' + e.message) }
+    });
+
+    async function playMorse(morseStr){
+      // dot = 1 unit, dash = 3 units; unit duration = 0.07s approx
+      const unit = 0.07;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 700;
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start();
+
+      function tone(duration){
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.005);
+        gain.gain.setValueAtTime(0.8, ctx.currentTime + duration - 0.005);
+        gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        return new Promise(resolve=> setTimeout(resolve, duration*1000));
+      }
+
+      // play sequence
+      const words = morseStr.split(' / ');
+      for (let wi=0; wi<words.length; wi++){
+        const word = words[wi].trim();
+        const letters = word.split(/\s+/);
+        for (let li=0; li<letters.length; li++){
+          const letter = letters[li];
+          for (let si=0; si<letter.length; si++){
+            const s = letter[si];
+            if (s === '.') await tone(unit);
+            else if (s === '-') await tone(unit*3);
+            await new Promise(r=>setTimeout(r, unit*1000)); // intra-character gap = 1 unit
+          }
+          await new Promise(r=>setTimeout(r, unit*2000)); // gap between letters ~ 2 units (approx)
+        }
+        await new Promise(r=>setTimeout(r, unit*4000)); // gap between words ~ 4 units
+      }
+
+      oscillator.stop();
+      ctx.close();
+    }
+
+    // Case converter
+    const caseInput = document.getElementById('caseInput');
+    const caseResult = document.getElementById('caseResult');
+    document.getElementById('caseGo').addEventListener('click', ()=>{
+      const v = caseInput.value || '';
+      const action = document.getElementById('caseAction').value;
+      if (!v){ caseResult.textContent = ''; return; }
+      let out = '';
+      if (action === 'upper') out = v.toUpperCase();
+      else if (action === 'lower') out = v.toLowerCase();
+      else if (action === 'title') out = v.toLowerCase().replace(/\b\w/g, ch => ch.toUpperCase());
+      else if (action === 'swap') out = Array.from(v).map(ch => ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase()).join('');
+      caseResult.textContent = out;
+    });
+
+    // Base64
+    const b64Input = document.getElementById('b64Input');
+    const b64Result = document.getElementById('b64Result');
+    document.getElementById('b64Go').addEventListener('click', ()=>{
+      const v = b64Input.value || '';
+      const action = document.getElementById('b64Action').value;
+      if (!v){ b64Result.textContent = ''; return; }
+      try{
+        if (action === 'encode'){
+          // UTF-8 safe base64
+          const b = new TextEncoder().encode(v);
+          const base64 = btoa(String.fromCharCode(...b));
+          b64Result.textContent = base64;
+        } else {
+          // decode base64 to UTF-8
+          const binary = atob(v);
+          const bytes = new Uint8Array([...binary].map(ch=>ch.charCodeAt(0)));
+          const text = new TextDecoder().decode(bytes);
+          b64Result.textContent = text;
+        }
+      }catch(e){
+        b64Result.textContent = 'Error: invalid input for chosen action.';
+      }
+    });
+
+    // Bytes converter
+    const bytesInput = document.getElementById('bytesInput');
+    const bytesFrom = document.getElementById('bytesFrom');
+    const bytesTo = document.getElementById('bytesTo');
+    const bytesResult = document.getElementById('bytesResult');
+    document.getElementById('bytesGo').addEventListener('click', ()=>{
+      const v = parseFloat(bytesInput.value);
+      if (isNaN(v)){ bytesResult.textContent = 'Enter a valid number'; return; }
+      const unitMap = { B:1, KB:1024, MB:1024**2, GB:1024**3 };
+      const from = unitMap[bytesFrom.value];
+      const to = unitMap[bytesTo.value];
+      const converted = (v * from) / to;
+      bytesResult.textContent = `${converted} ${bytesTo.value}`;
+    });
+
+    // Quick actions
+    document.getElementById('copyResult').addEventListener('click', async ()=>{
+      // choose visible panel's result element
+      const visible = document.querySelector('.panel-item:not([style*="display: none"])');
+      if (!visible) return;
+      const res = visible.querySelector('.result');
+      const text = res && res.textContent ? res.textContent : '';
+      if (!text) return alert('Nothing to copy.');
+      try{
+        await navigator.clipboard.writeText(text);
+        alert('Copied to clipboard');
+      }catch(e){
+        // fallback
+        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); ta.remove();
+        alert('Copied to clipboard');
+      }
+    });
+
+    document.getElementById('clearAll').addEventListener('click', ()=>{
+      document.querySelectorAll('textarea').forEach(t=>t.value='');
+      document.querySelectorAll('.result').forEach(r=>r.textContent='');
+      document.querySelectorAll('input[type=number]').forEach(n=>n.value='');
+    });
+
+    document.getElementById('swap').addEventListener('click', ()=>{
+      const visible = document.querySelector('.panel-item:not([style*="display: none"])');
+      if (!visible) return;
+      // swap first textarea with result text
+      const input = visible.querySelector('textarea') || visible.querySelector('input[type=number]');
+      const result = visible.querySelector('.result');
+      if (!input || !result) return;
+      const inValue = input.value || input.value === undefined ? input.value : input.value;
+      const resValue = result.textContent || '';
+      // If number input attempt parse
+      if (input.tagName === 'INPUT'){
+        const num = parseFloat(resValue);
+        if (!isNaN(num)) input.value = num;
+        else alert('Result is not a number; cannot swap into numeric input.');
+      } else {
+        input.value = resValue;
+      }
+      result.textContent = inValue;
+    });
+
+    // help button
+    document.getElementById('helpBtn').addEventListener('click', ()=>{
+      alert(
+        "How to use the Morse (Moose) converter:\\n\\n" +
+        "- Type normal text and press Convert (Auto or Encode) to get Morse.\\n" +
+        "- Paste morse (dots . and dashes -), letters separated by spaces, words separated by ' / ' and press Convert (Auto or Decode) to decode.\\n" +
+        "- Use Play to hear a simple beep representation of morse.\\n" +
+        "- Use other tabs for case, base64 and bytes conversions."
+      );
+    });
+
+    // small usability: press Ctrl+Enter in any textarea to convert (Morse or Base64 or Case)
+    document.querySelectorAll('textarea').forEach(ta=>{
+      ta.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+          // find which panel this textarea is in and trigger the correct button
+          const parent = ta.closest('.panel-item');
+          if (!parent) return;
+          if (parent.id === 'panel-morse') morseGo.click();
+          if (parent.id === 'panel-case') document.getElementById('caseGo').click();
+          if (parent.id === 'panel-base64') document.getElementById('b64Go').click();
+        }
+      });
+    });
+
+    // Accessibility: make first panel visible
+    panels.morse.style.display = '';
+  </script>
+  
+</body>
+</html>
